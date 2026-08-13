@@ -19,7 +19,29 @@ export const StorageService = {
   // Save user settings securely to chrome.storage.local
   saveSettings: (apiKey, lang) => {
     return new Promise((resolve) => {
-      chrome.storage.local.set({ apiKey: apiKey.trim(), lang }, () => {
+      const data = { lang };
+      if (typeof apiKey === 'string' && apiKey.trim() !== '') {
+        data.apiKey = apiKey.trim();
+      }
+      chrome.storage.local.set(data, () => {
+        resolve(true);
+      });
+    });
+  },
+
+  // Save only Language preference without touching API Key
+  saveLanguage: (lang) => {
+    return new Promise((resolve) => {
+      chrome.storage.local.set({ lang }, () => {
+        resolve(true);
+      });
+    });
+  },
+
+  // Save only API Key
+  saveApiKey: (apiKey) => {
+    return new Promise((resolve) => {
+      chrome.storage.local.set({ apiKey: apiKey.trim() }, () => {
         resolve(true);
       });
     });

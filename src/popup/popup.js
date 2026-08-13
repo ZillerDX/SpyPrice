@@ -74,8 +74,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     currentLang = currentLang === 'en' ? 'th' : 'en';
     langText.textContent = currentLang.toUpperCase();
 
-    const key = apiKeyInput.value.trim();
-    await StorageService.saveSettings(key, currentLang);
+    await StorageService.saveLanguage(currentLang);
     updateUILanguage(currentLang);
     await renderProductList();
   });
@@ -87,7 +86,7 @@ document.addEventListener('DOMContentLoaded', async () => {
       showStatus(i18n[currentLang].noKeyWarning, true);
       return;
     }
-    await StorageService.saveSettings(key, currentLang);
+    await StorageService.saveApiKey(key);
     showStatus(i18n[currentLang].keySaved, false);
   });
 
