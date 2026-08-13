@@ -295,8 +295,48 @@ function formatTimestamp(isoString) {
 
 /**
  * Export product tracking data to beautifully formatted Excel file (.xls HTML Table)
+ * Dynamically localized based on currently selected language (EN / TH)
  */
 function exportToExcel(products) {
+  const excelDict = {
+    en: {
+      reportTitle: "🎯 SpyPrice AI - Competitor Price Intelligence Report",
+      exportedDate: "Exported Date:",
+      totalMonitored: "Total Monitored:",
+      itemsUnit: "items",
+      colNum: "#",
+      colTitle: "Product Name",
+      colCurrentPrice: "Current Price",
+      colInitialPrice: "Initial Price",
+      colCurrency: "Currency",
+      colStatus: "Price Status",
+      colLastUpdated: "Last Updated",
+      colLink: "Product Link",
+      statusDropped: "Price Dropped",
+      statusNormal: "Normal",
+      openLink: "🔗 Open Link"
+    },
+    th: {
+      reportTitle: "🎯 SpyPrice AI - รายงานสรุปการติดตามราคาคู่แข่ง",
+      exportedDate: "วันที่ส่งออกรายงาน:",
+      totalMonitored: "สินค้าที่ติดตามทั้งหมด:",
+      itemsUnit: "รายการ",
+      colNum: "ลำดับ",
+      colTitle: "ชื่อสินค้า",
+      colCurrentPrice: "ราคาปัจจุบัน",
+      colInitialPrice: "ราคาตั้งต้น",
+      colCurrency: "สกุลเงิน",
+      colStatus: "สถานะราคา",
+      colLastUpdated: "อัปเดตล่าสุด",
+      colLink: "ลิงก์สินค้า",
+      statusDropped: "ราคาลดลง",
+      statusNormal: "ปกติ",
+      openLink: "🔗 เปิดลิงก์สินค้า"
+    }
+  };
+
+  const t = excelDict[currentLang] || excelDict.en;
+
   const rowsHtml = products.map((p, index) => {
     const isPriceDrop = p.currentPrice < p.initialPrice;
     const priceDiff = p.initialPrice - p.currentPrice;
@@ -305,13 +345,10 @@ function exportToExcel(products) {
       : 0;
 
     const statusHtml = isPriceDrop 
-      ? `<span style="background-color: #FEE2E2; color: #DC2626; font-weight: bold; padding: 4px 10px; border-radius: 4px;">Price Dropped (-${dropPercent}%)</span>` 
-      : `<span style="color: #64748B; font-weight: 500;">Normal</span>`;
+      ? `<span style="background-color: #FEE2E2; color: #DC2626; font-weight: bold; padding: 4px 10px; border-radius: 4px;">${t.statusDropped} (-${dropPercent}%)</span>` 
+      : `<span style="color: #64748B; font-weight: 500;">${t.statusNormal}</span>`;
 
     const dateFormatted = formatTimestamp(p.lastChecked || p.updatedAt);
-    
-    // Clean link text instead of raw long URL
-    const linkText = currentLang === 'th' ? '🔗 เปิดลิงก์สินค้า' : '🔗 Open Link';
 
     return `
       <tr style="height: 32px;">
@@ -325,14 +362,14 @@ function exportToExcel(products) {
         <td style="width: 150pt; min-width: 200px; text-align:center;">${statusHtml}</td>
         <td style="width: 140pt; min-width: 180px; text-align:center; color:#475569; mso-number-format:'\\@';">${dateFormatted}</td>
         <td style="width: 120pt; min-width: 160px; text-align:center;">
-          <a href="${escapeHtml(p.url)}" target="_blank" style="color:#2563EB; font-weight:600; text-decoration:underline;">${linkText}</a>
+          <a href="${escapeHtml(p.url)}" target="_blank" style="color:#2563EB; font-weight:600; text-decoration:underline;">${t.openLink}</a>
         </td>
       </tr>
     `;
   }).join('');
 
   const now = new Date();
-  const dateFormatted = now.toLocaleString('th-TH');
+  const dateFormatted = currentLang === 'th' ? now.toLocaleString('th-TH') : now.toLocaleString('en-US');
   
   const excelTemplate = `
     <html xmlns:o="urn:schemas-microsoft-com:office:office" xmlns:x="urn:schemas-microsoft-com:office:excel" xmlns="http://www.w3.org/TR/REC-html40">
@@ -362,8 +399,8 @@ function exportToExcel(products) {
       </style>
     </head>
     <body>
-      <h2 style="color: #0F172A; font-family: 'Segoe UI', sans-serif; margin-bottom: 2px;">🎯 SpyPrice AI - Competitor Price Intelligence Report</h2>
-      <p style="color: #64748B; font-size: 10pt; margin-top: 0; margin-bottom: 12px;">Exported Date: ${dateFormatted} | Total Monitored: ${products.length} items</p>
+      <h2 style="color: #0F172A; font-family: 'Segoe UI', sans-serif; margin-bottom: 2px;">${t.reportTitle}</h2>
+      <p style="color: #64748B; font-size: 10pt; margin-top: 0; margin-bottom: 12px;">${t.exportedDate} ${dateFormatted} | ${t.totalMonitored} ${products.length} ${t.itemsUnit}</p>
       <table border="1">
         <colgroup>
           <col width="60" style="width: 45pt; min-width: 60px;">
@@ -377,14 +414,14 @@ function exportToExcel(products) {
         </colgroup>
         <thead>
           <tr style="height: 36px;">
-            <th width="60" style="width: 45pt; min-width: 60px; text-align:center;">#</th>
-            <th width="460" style="width: 350pt; min-width: 460px; text-align:left;">Product Name (ชื่อสินค้า)</th>
-            <th width="180" style="width: 140pt; min-width: 180px; text-align:right;">Current Price (ราคาปัจจุบัน)</th>
-            <th width="180" style="width: 140pt; min-width: 180px; text-align:right;">Initial Price (ราคาตั้งต้น)</th>
-            <th width="100" style="width: 75pt; min-width: 100px; text-align:center;">Currency</th>
-            <th width="200" style="width: 150pt; min-width: 200px; text-align:center;">Price Status (สถานะราคา)</th>
-            <th width="180" style="width: 140pt; min-width: 180px; text-align:center;">Last Updated (อัปเดตล่าสุด)</th>
-            <th width="160" style="width: 120pt; min-width: 160px; text-align:center;">Product Link (ลิงก์สินค้า)</th>
+            <th width="60" style="width: 45pt; min-width: 60px; text-align:center;">${t.colNum}</th>
+            <th width="460" style="width: 350pt; min-width: 460px; text-align:left;">${t.colTitle}</th>
+            <th width="180" style="width: 140pt; min-width: 180px; text-align:right;">${t.colCurrentPrice}</th>
+            <th width="180" style="width: 140pt; min-width: 180px; text-align:right;">${t.colInitialPrice}</th>
+            <th width="100" style="width: 75pt; min-width: 100px; text-align:center;">${t.colCurrency}</th>
+            <th width="200" style="width: 150pt; min-width: 200px; text-align:center;">${t.colStatus}</th>
+            <th width="180" style="width: 140pt; min-width: 180px; text-align:center;">${t.colLastUpdated}</th>
+            <th width="160" style="width: 120pt; min-width: 160px; text-align:center;">${t.colLink}</th>
           </tr>
         </thead>
         <tbody>
