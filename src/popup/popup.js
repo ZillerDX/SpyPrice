@@ -286,42 +286,97 @@ function formatTimestamp(isoString) {
 }
 
 /**
- * Export product tracking data to CSV (Excel / Sheet compatible UTF-8 BOM)
+ * Export product tracking data to beautifully formatted Excel file (.xls HTML Table)
  */
 function exportToCsv(products) {
-  const headers = [
-    'Product Title (ชื่อสินค้า)',
-    'Current Price (ราคาปัจจุบัน)',
-    'Initial Price (ราคาตั้งต้น)',
-    'Currency (สกุลเงิน)',
-    'Price Status (สถานะราคา)',
-    'Last Updated (อัปเดตล่าสุด)',
-    'Product URL (ลิงก์สินค้า)'
-  ];
-
-  const rows = products.map(p => {
+  const rowsHtml = products.map((p, index) => {
     const isPriceDrop = p.currentPrice < p.initialPrice;
-    const status = isPriceDrop ? 'Price Dropped (ราคาลดลง)' : 'Normal (ราคาปกติ)';
+    const priceDiff = p.initialPrice - p.currentPrice;
+    const dropPercent = (p.initialPrice > 0 && isPriceDrop) 
+      ? Math.round((priceDiff / p.initialPrice) * 100) 
+      : 0;
+
+    const statusHtml = isPriceDrop 
+      ? `<span style="background-color: #FEE2E2; color: #DC2626; font-weight: bold; padding: 4px 8px; border-radius: 4px;">Price Dropped (-${dropPercent}%)</span>` 
+      : `<span style="color: #64748B;">Normal</span>`;
+
     const dateFormatted = formatTimestamp(p.lastChecked || p.updatedAt);
+    
+    // Decode URL for clean human readability
+    let displayUrl = p.url || '';
+    try {
+      displayUrl = decodeURIComponent(p.url);
+    } catch (e) {}
 
-    return [
-      `"${String(p.title || '').replace(/"/g, '""')}"`,
-      p.currentPrice || 0,
-      p.initialPrice || 0,
-      `"${p.currency || 'THB'}"`,
-      `"${status}"`,
-      `"${dateFormatted}"`,
-      `"${p.url || ''}"`
-    ].join(',');
-  });
+    return `
+      <tr>
+        <td style="text-align:center; color:#64748B;">${index + 1}</td>
+        <td style="font-weight:600; color:#0F172A;">${escapeHtml(p.title || 'Product')}</td>
+        <td style="font-weight:bold; color:#059669; text-align:right;">${p.currency || 'THB'} ${Number(p.currentPrice || 0).toLocaleString()}</td>
+        <td style="text-align:right; color:#64748B;">${p.currency || 'THB'} ${Number(p.initialPrice || 0).toLocaleString()}</td>
+        <td style="text-align:center;">${escapeHtml(p.currency || 'THB')}</td>
+        <td style="text-align:center;">${statusHtml}</td>
+        <td style="text-align:center; color:#475569;">${dateFormatted}</td>
+        <td><a href="${escapeHtml(p.url)}" target="_blank" style="color:#2563EB; text-decoration:underline;">${escapeHtml(displayUrl)}</a></td>
+      </tr>
+    `;
+  }).join('');
 
-  // Include UTF-8 BOM (\uFEFF) for automatic Thai character support in Excel
-  const csvContent = '\uFEFF' + [headers.join(','), ...rows].join('\n');
-  const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+  const excelTemplate = `
+    <html xmlns:o="urn:schemas-microsoft-com:office:office" xmlns:x="urn:schemas-microsoft-com:office:excel" xmlns="http://www.w3.org/TR/REC-html40">
+    <head>
+      <meta charset="utf-8">
+      <!--[if gte mso 9]>
+      <xml>
+        <x:ExcelWorkbook>
+          <x:ExcelWorksheets>
+            <x:ExcelWorksheet>
+              <x:Name>SpyPrice Monitored Products</x:Name>
+              <x:WorksheetOptions>
+                <x:DisplayGridlines/>
+              </x:WorksheetOptions>
+            </x:ExcelWorksheet>
+          </x:ExcelWorksheets>
+        </x:ExcelWorkbook>
+      </xml>
+      <![endif]-->
+      <style>
+        body { font-family: 'Segoe UI', Tahoma, Arial, sans-serif; font-size: 11pt; }
+        table { border-collapse: collapse; width: 100%; margin-top: 10px; }
+        th { background-color: #1E40AF; color: #FFFFFF; font-weight: bold; padding: 10px 14px; border: 1px solid #1E3A8A; text-align: left; }
+        td { padding: 8px 12px; border: 1px solid #CBD5E1; vertical-align: middle; }
+        tr:nth-child(even) { background-color: #F8FAFC; }
+      </style>
+    </head>
+    <body>
+      <h2 style="color: #1E293B; font-family: 'Segoe UI', sans-serif; margin-bottom: 4px;">🎯 SpyPrice AI - Competitor Price Tracker Report</h2>
+      <p style="color: #64748B; font-size: 10pt; margin-top: 0;">Exported Date: ${new Date().toLocaleString('th-TH')}</p>
+      <table>
+        <thead>
+          <tr>
+            <th style="width: 40px; text-align:center;">#</th>
+            <th style="width: 320px;">Product Name (ชื่อสินค้า)</th>
+            <th style="width: 140px; text-align:right;">Current Price (ราคาปัจจุบัน)</th>
+            <th style="width: 140px; text-align:right;">Initial Price (ราคาตั้งต้น)</th>
+            <th style="width: 80px; text-align:center;">Currency</th>
+            <th style="width: 160px; text-align:center;">Price Status (สถานะราคา)</th>
+            <th style="width: 150px; text-align:center;">Last Updated (อัปเดตล่าสุด)</th>
+            <th style="width: 450px;">Product Link (ลิงก์สินค้า)</th>
+          </tr>
+        </thead>
+        <tbody>
+          ${rowsHtml}
+        </tbody>
+      </table>
+    </body>
+    </html>
+  `;
+
+  const blob = new Blob([excelTemplate], { type: 'application/vnd.ms-excel;charset=utf-8;' });
   const url = URL.createObjectURL(blob);
 
   const today = new Date().toISOString().split('T')[0];
-  const filename = `SpyPrice_Tracked_Products_${today}.csv`;
+  const filename = `SpyPrice_Tracked_Products_${today}.xls`;
 
   const link = document.createElement('a');
   link.href = url;
