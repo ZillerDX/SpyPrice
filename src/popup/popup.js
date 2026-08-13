@@ -300,7 +300,7 @@ function formatTimestamp(isoString) {
 function exportToExcel(products) {
   const excelDict = {
     en: {
-      reportTitle: "🎯 SpyPrice AI - Competitor Price Intelligence Report",
+      reportTitle: "🎯 SpyPrice AI - Product Price Intelligence Report",
       exportedDate: "Exported Date:",
       totalMonitored: "Total Monitored:",
       itemsUnit: "items",
@@ -317,7 +317,7 @@ function exportToExcel(products) {
       openLink: "🔗 Open Link"
     },
     th: {
-      reportTitle: "🎯 SpyPrice AI - รายงานสรุปการติดตามราคาคู่แข่ง",
+      reportTitle: "🎯 SpyPrice AI - รายงานสรุปการติดตามราคาสินค้า",
       exportedDate: "วันที่ส่งออกรายงาน:",
       totalMonitored: "สินค้าที่ติดตามทั้งหมด:",
       itemsUnit: "รายการ",
@@ -345,24 +345,24 @@ function exportToExcel(products) {
       : 0;
 
     const statusHtml = isPriceDrop 
-      ? `<span style="background-color: #FEE2E2; color: #DC2626; font-weight: bold; padding: 4px 10px; border-radius: 4px;">${t.statusDropped} (-${dropPercent}%)</span>` 
-      : `<span style="color: #64748B; font-weight: 500;">${t.statusNormal}</span>`;
+      ? `<span style="background-color: #FEE2E2; color: #B91C1C; font-weight: bold; padding: 4px 10px; border-radius: 4px;">${t.statusDropped} (-${dropPercent}%)</span>` 
+      : `<span style="color: #334155; font-weight: 600;">${t.statusNormal}</span>`;
 
     const dateFormatted = formatTimestamp(p.lastChecked || p.updatedAt);
 
     return `
-      <tr style="height: 32px;">
-        <td style="width: 45pt; min-width: 60px; text-align:center; color:#64748B; font-weight:bold;">${index + 1}</td>
-        <td style="width: 350pt; min-width: 460px; font-weight:600; color:#0F172A; mso-number-format:'\\@';">
+      <tr style="height: 34px;">
+        <td style="width: 45pt; min-width: 60px; text-align:center; color:#1E293B; font-weight:bold;">${index + 1}</td>
+        <td style="width: 510pt; min-width: 680px; font-weight:600; color:#0F172A; mso-number-format:'\\@'; padding-right: 24px;">
           <a href="${escapeHtml(p.url)}" target="_blank" style="color:#0F172A; text-decoration:none;">${escapeHtml(p.title || 'Product')}</a>
         </td>
-        <td style="width: 140pt; min-width: 180px; font-weight:bold; color:#059669; text-align:right;">${p.currency || 'THB'} ${Number(p.currentPrice || 0).toLocaleString()}</td>
-        <td style="width: 140pt; min-width: 180px; text-align:right; color:#64748B;">${p.currency || 'THB'} ${Number(p.initialPrice || 0).toLocaleString()}</td>
-        <td style="width: 75pt; min-width: 100px; text-align:center; font-weight:500;">${escapeHtml(p.currency || 'THB')}</td>
-        <td style="width: 150pt; min-width: 200px; text-align:center;">${statusHtml}</td>
-        <td style="width: 140pt; min-width: 180px; text-align:center; color:#475569; mso-number-format:'\\@';">${dateFormatted}</td>
+        <td style="width: 150pt; min-width: 200px; font-weight:bold; color:#047857; text-align:right;">${p.currency || 'THB'} ${Number(p.currentPrice || 0).toLocaleString()}</td>
+        <td style="width: 150pt; min-width: 200px; text-align:right; color:#1E293B; font-weight:600;">${p.currency || 'THB'} ${Number(p.initialPrice || 0).toLocaleString()}</td>
+        <td style="width: 75pt; min-width: 100px; text-align:center; font-weight:600; color:#1E293B;">${escapeHtml(p.currency || 'THB')}</td>
+        <td style="width: 160pt; min-width: 210px; text-align:center;">${statusHtml}</td>
+        <td style="width: 140pt; min-width: 180px; text-align:center; color:#0F172A; font-weight:500; mso-number-format:'\\@';">${dateFormatted}</td>
         <td style="width: 120pt; min-width: 160px; text-align:center;">
-          <a href="${escapeHtml(p.url)}" target="_blank" style="color:#2563EB; font-weight:600; text-decoration:underline;">${t.openLink}</a>
+          <a href="${escapeHtml(p.url)}" target="_blank" style="color:#1D4ED8; font-weight:700; text-decoration:underline;">${t.openLink}</a>
         </td>
       </tr>
     `;
@@ -393,31 +393,31 @@ function exportToExcel(products) {
       <style>
         body { font-family: 'Segoe UI', Tahoma, Arial, sans-serif; font-size: 11pt; color: #0F172A; }
         table { border-collapse: collapse; width: 100%; margin-top: 14px; table-layout: fixed; }
-        th { background-color: #0F172A; color: #F8FAFC; font-weight: bold; padding: 12px 14px; border: 1px solid #1E293B; text-align: left; white-space: nowrap; height: 36px; }
-        td { padding: 10px 14px; border: 1px solid #CBD5E1; vertical-align: middle; white-space: nowrap; height: 32px; }
+        th { background-color: #0F172A; color: #FFFFFF; font-weight: bold; padding: 12px 16px; border: 1px solid #1E293B; text-align: left; white-space: nowrap; height: 38px; }
+        td { padding: 10px 16px; border: 1px solid #CBD5E1; vertical-align: middle; white-space: nowrap; height: 34px; }
         tr:nth-child(even) { background-color: #F8FAFC; }
       </style>
     </head>
     <body>
       <h2 style="color: #0F172A; font-family: 'Segoe UI', sans-serif; margin-bottom: 2px;">${t.reportTitle}</h2>
-      <p style="color: #64748B; font-size: 10pt; margin-top: 0; margin-bottom: 12px;">${t.exportedDate} ${dateFormatted} | ${t.totalMonitored} ${products.length} ${t.itemsUnit}</p>
+      <p style="color: #334155; font-size: 10pt; font-weight: 500; margin-top: 0; margin-bottom: 14px;">${t.exportedDate} ${dateFormatted} | ${t.totalMonitored} ${products.length} ${t.itemsUnit}</p>
       <table border="1">
         <colgroup>
           <col width="60" style="width: 45pt; min-width: 60px;">
-          <col width="460" style="width: 350pt; min-width: 460px;">
-          <col width="180" style="width: 140pt; min-width: 180px;">
-          <col width="180" style="width: 140pt; min-width: 180px;">
-          <col width="100" style="width: 75pt; min-width: 100px;">
+          <col width="680" style="width: 510pt; min-width: 680px;">
           <col width="200" style="width: 150pt; min-width: 200px;">
+          <col width="200" style="width: 150pt; min-width: 200px;">
+          <col width="100" style="width: 75pt; min-width: 100px;">
+          <col width="210" style="width: 160pt; min-width: 210px;">
           <col width="180" style="width: 140pt; min-width: 180px;">
           <col width="160" style="width: 120pt; min-width: 160px;">
         </colgroup>
         <thead>
-          <tr style="height: 36px;">
+          <tr style="height: 38px;">
             <th width="60" style="width: 45pt; min-width: 60px; text-align:center;">${t.colNum}</th>
-            <th width="460" style="width: 350pt; min-width: 460px; text-align:left;">${t.colTitle}</th>
-            <th width="180" style="width: 140pt; min-width: 180px; text-align:right;">${t.colCurrentPrice}</th>
-            <th width="180" style="width: 140pt; min-width: 180px; text-align:right;">${t.colInitialPrice}</th>
+            <th width="680" style="width: 510pt; min-width: 680px; text-align:left;">${t.colTitle}</th>
+            <th width="200" style="width: 150pt; min-width: 200px; text-align:right;">${t.colCurrentPrice}</th>
+            <th width="200" style="width: 150pt; min-width: 200px; text-align:right;">${t.colInitialPrice}</th>
             <th width="100" style="width: 75pt; min-width: 100px; text-align:center;">${t.colCurrency}</th>
             <th width="200" style="width: 150pt; min-width: 200px; text-align:center;">${t.colStatus}</th>
             <th width="180" style="width: 140pt; min-width: 180px; text-align:center;">${t.colLastUpdated}</th>
