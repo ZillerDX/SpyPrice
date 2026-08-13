@@ -12,37 +12,47 @@
     <header class="app-header">
       <div class="brand">
         <div class="logo-wrapper">
-          <span class="logo-icon">🎯</span>
+          <img src="../assets/logo.jpg" alt="SpyPrice AI Logo" class="brand-logo-img">
         </div>
         <div class="brand-text">
           <h1 class="brand-name">SpyPrice <span class="badge-ai">AI</span></h1>
-          <span class="brand-subtitle">Smart Price Tracker</span>
+          <span class="brand-subtitle">Smart Competitor Tracker</span>
         </div>
       </div>
-      <div class="lang-selector">
-        <select id="langSelect" aria-label="Select Language">
-          <option value="en">🇬🇧 EN</option>
-          <option value="th">🇹🇭 TH</option>
-        </select>
-      </div>
+      
+      <!-- Minimalist Single EN/TH Language Switcher -->
+      <button id="langToggleBtn" class="lang-toggle-pill" title="Switch Language">
+        <span id="langText" class="lang-text">EN</span>
+      </button>
     </header>
 
     <!-- Stats Overview Summary -->
     <div class="stats-grid">
       <div class="stat-card">
-        <span class="stat-value" id="statTotal">0</span>
-        <span class="stat-label" id="statTotalLabel">Total Monitored</span>
+        <div class="stat-icon-bg icon-blue">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="m7.5 4.27 9 5.15"/><path d="M21 8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16Z"/><path d="m3.3 7 8.7 5 8.7-5"/><path d="M12 22V12"/></svg>
+        </div>
+        <div class="stat-content">
+          <span class="stat-value" id="statTotal">0</span>
+          <span class="stat-label" id="statTotalLabel">Total Monitored</span>
+        </div>
       </div>
       <div class="stat-card stat-drops">
-        <span class="stat-value" id="statDrops">0</span>
-        <span class="stat-label" id="statDropsLabel">Price Drops</span>
+        <div class="stat-icon-bg icon-green">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="22 17 13.5 8.5 8.5 13.5 2 7"/><polyline points="16 17 22 17 22 11"/></svg>
+        </div>
+        <div class="stat-content">
+          <span class="stat-value" id="statDrops">0</span>
+          <span class="stat-label" id="statDropsLabel">Price Drops</span>
+        </div>
       </div>
     </div>
 
     <!-- API Key Settings Card -->
     <section class="card settings-card">
       <div class="settings-header">
-        <h2 id="apiKeyTitle" class="card-title">🔑 Gemini API Key</h2>
+        <svg class="section-icon" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="7.5" cy="15.5" r="5.5"/><path d="m21 2-9.6 9.6"/><path d="m15.5 7.5 3 3"/></svg>
+        <h2 id="apiKeyTitle" class="card-title">Gemini API Key</h2>
       </div>
       <div class="input-group">
         <input type="password" id="apiKeyInput" placeholder="Enter Gemini API key (AIzaSy...)" autocomplete="off">
@@ -54,14 +64,17 @@
     <!-- Action Buttons -->
     <section class="actions-group">
       <button id="trackTabBtn" class="btn btn-primary btn-block">
-        <span class="btn-icon">📌</span> <span id="trackCurrentTabLabel">Track Current Product</span>
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+        <span id="trackCurrentTabLabel">Track Current Product</span>
       </button>
       <div class="action-row">
         <button id="scanAllBtn" class="btn btn-outline">
-          <span class="btn-icon">🔄</span> <span id="scanAllBtnLabel">Scan Prices</span>
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12a9 9 0 0 0-9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/><path d="M3 3v5h5"/><path d="M3 12a9 9 0 0 0 9 9 9.75 9.75 0 0 0 6.74-2.74L21 16"/><path d="M16 16h5v5"/></svg>
+          <span id="scanAllBtnLabel">Scan Prices</span>
         </button>
         <button id="exportCsvBtn" class="btn btn-outline btn-excel">
-          <span class="btn-icon">📊</span> <span id="exportCsvLabel">Export to Sheet</span>
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M14.5 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7.5L14.5 2z"/><polyline points="14 2 14 8 20 8"/><path d="M8 13h8"/><path d="M8 17h8"/><path d="M10 9h1"/></svg>
+          <span id="exportCsvLabel">Export to Sheet</span>
         </button>
       </div>
     </section>
@@ -69,7 +82,10 @@
     <!-- Monitored Product List -->
     <section class="card list-card">
       <div class="list-header">
-        <h2 id="trackedListTitle" class="card-title">Monitored Products</h2>
+        <div class="list-title-group">
+          <svg class="section-icon" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 2 3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4Z"/><path d="M3 6h18"/><path d="M16 10a4 4 0 0 1-8 0"/></svg>
+          <h2 id="trackedListTitle" class="card-title">Monitored Products</h2>
+        </div>
         <span id="productCount" class="badge-count">0</span>
       </div>
       <div id="productList" class="product-list">
@@ -79,7 +95,7 @@
 
     <!-- Footer -->
     <footer class="app-footer">
-      <p>Local-First • Zero Infrastructure Fee • <a href="https://github.com/ZillerDX/SpyPrice" target="_blank" rel="noopener">GitHub</a></p>
+      <p>Client-First Architecture • <a href="https://github.com/ZillerDX/SpyPrice" target="_blank" rel="noopener">GitHub Repo</a></p>
     </footer>
   </div>
 

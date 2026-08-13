@@ -4,7 +4,7 @@ import { GeminiService } from '../services/gemini.js';
 // Dictionary for UI translations
 const i18n = {
   en: {
-    apiKeyTitle: "🔑 Gemini API Key",
+    apiKeyTitle: "Gemini API Key",
     apiKeyPlaceholder: "Enter Gemini API key (AIzaSy...)",
     saveBtn: "Save",
     trackCurrentTabLabel: "Track Current Product",
@@ -20,16 +20,16 @@ const i18n = {
     scanComplete: "Scan complete!",
     scanError: "Error scanning page: ",
     priceDrop: "Price Drop!",
-    exportSuccess: "CSV Exported successfully!",
+    exportSuccess: "Excel file exported successfully!",
     noProductsExport: "No products available to export."
   },
   th: {
-    apiKeyTitle: "🔑 ตั้งค่า Gemini API Key",
+    apiKeyTitle: "ตั้งค่า Gemini API Key",
     apiKeyPlaceholder: "กรอกรหัส Gemini API Key (AIzaSy...)",
     saveBtn: "บันทึก",
     trackCurrentTabLabel: "ติดตามสินค้าในหน้านี้",
     scanAllBtnLabel: "สแกนเช็กราคา",
-    exportCsvLabel: "ส่งออก CSV / Sheet",
+    exportCsvLabel: "ส่งออก Sheet / Excel",
     trackedListTitle: "รายการสินค้าที่ติดตามอยู่",
     statTotalLabel: "สินค้าที่ติดตาม",
     statDropsLabel: "ราคาสินค้าลดลง",
@@ -40,7 +40,7 @@ const i18n = {
     scanComplete: "สแกนเรียบร้อยแล้ว!",
     scanError: "เกิดข้อผิดพลาดในการสแกน: ",
     priceDrop: "ราคาลดลง!",
-    exportSuccess: "ส่งออกไฟล์ CSV เรียบร้อยแล้ว!",
+    exportSuccess: "ส่งออกไฟล์ Excel เรียบร้อยแล้ว!",
     noProductsExport: "ไม่มีรายการสินค้าสำหรับส่งออก"
   }
 };
@@ -51,14 +51,17 @@ document.addEventListener('DOMContentLoaded', async () => {
   const settings = await StorageService.getSettings();
   currentLang = settings.lang || 'en';
 
-  const langSelect = document.getElementById('langSelect');
+  const langToggleBtn = document.getElementById('langToggleBtn');
+  const langText = document.getElementById('langText');
   const apiKeyInput = document.getElementById('apiKeyInput');
   const saveKeyBtn = document.getElementById('saveKeyBtn');
   const trackTabBtn = document.getElementById('trackTabBtn');
   const scanAllBtn = document.getElementById('scanAllBtn');
   const exportCsvBtn = document.getElementById('exportCsvBtn');
 
-  langSelect.value = currentLang;
+  // Set initial single button language text (EN or TH)
+  langText.textContent = (currentLang || 'en').toUpperCase();
+
   if (settings.apiKey) {
     apiKeyInput.value = settings.apiKey;
   }
@@ -66,9 +69,11 @@ document.addEventListener('DOMContentLoaded', async () => {
   updateUILanguage(currentLang);
   await renderProductList();
 
-  // Language Change Listener
-  langSelect.addEventListener('change', async (e) => {
-    currentLang = e.target.value;
+  // Single Click Language Toggle Listener (EN <-> TH)
+  langToggleBtn.addEventListener('click', async () => {
+    currentLang = currentLang === 'en' ? 'th' : 'en';
+    langText.textContent = currentLang.toUpperCase();
+
     const key = apiKeyInput.value.trim();
     await StorageService.saveSettings(key, currentLang);
     updateUILanguage(currentLang);
@@ -170,7 +175,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     showStatus(i18n[currentLang].scanComplete, false);
   });
 
-  // Export to Sheet / CSV Listener
+  // Export to Sheet / Excel Listener
   exportCsvBtn.addEventListener('click', async () => {
     const products = await StorageService.getProducts();
     if (products.length === 0) {
@@ -178,7 +183,7 @@ document.addEventListener('DOMContentLoaded', async () => {
       return;
     }
 
-    exportToCsv(products);
+    exportToExcel(products);
     showStatus(i18n[currentLang].exportSuccess, false);
   });
 });
@@ -253,7 +258,10 @@ async function renderProductList() {
           ${isPriceDrop ? `<span class="price-initial">${prod.currency || 'THB'} ${prod.initialPrice.toLocaleString()}</span>` : ''}
           ${isPriceDrop ? `<span class="price-drop-tag">-${dropPercentage}%</span>` : ''}
         </div>
-        <span class="timestamp-text">🕒 ${formattedDate}</span>
+        <span class="timestamp-text">
+          <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+          ${formattedDate}
+        </span>
       </div>
     `;
 
@@ -288,7 +296,7 @@ function formatTimestamp(isoString) {
 /**
  * Export product tracking data to beautifully formatted Excel file (.xls HTML Table)
  */
-function exportToCsv(products) {
+function exportToExcel(products) {
   const rowsHtml = products.map((p, index) => {
     const isPriceDrop = p.currentPrice < p.initialPrice;
     const priceDiff = p.initialPrice - p.currentPrice;
