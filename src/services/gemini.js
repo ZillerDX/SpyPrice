@@ -5,6 +5,30 @@
 
 export const GeminiService = {
   /**
+   * Fetch available models for the user's API key that support generateContent.
+   * @param {string} apiKey
+   * @returns {Promise<string[]>} List of model resource names (e.g., ['models/gemini-2.0-flash', ...])
+   */
+  getAvailableModels: async (apiKey) => {
+    try {
+      const res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models?key=${encodeURIComponent(apiKey)}`);
+      if (!res.ok) {
+        return [];
+      }
+      const data = await res.json();
+      if (!data.models || !Array.isArray(data.models)) {
+        return [];
+      }
+      return data.models
+        .filter(m => m.supportedGenerationMethods && m.supportedGenerationMethods.includes('generateContent'))
+        .map(m => m.name);
+    } catch (err) {
+      console.warn('Failed to auto-discover models:', err);
+      return [];
+    }
+  },
+
+  /**
    * Extract product details (Title, Price, Currency) from raw page text/HTML snippet.
    * @param {string} pageText - Cleaned text content from web page
    * @param {string} apiKey - Gemini API Key
@@ -33,18 +57,31 @@ Web Page Content:
 ${truncatedText}
 `;
 
-    // Candidate models to ensure compatibility across Google API updates
-    const modelCandidates = [
-      'gemini-2.5-flash',
-      'gemini-2.0-flash',
-      'gemini-1.5-flash-latest',
-      'gemini-1.5-flash'
-    ];
+    // 1. Try to auto-discover available models for this specific API key
+    let candidateModels = await GeminiService.getAvailableModels(apiKey);
+
+    // Filter/prioritize Flash models first
+    if (candidateModels.length > 0) {
+      const flashModels = candidateModels.filter(m => m.toLowerCase().includes('flash'));
+      const otherModels = candidateModels.filter(m => !m.toLowerCase().includes('flash'));
+      candidateModels = [...flashModels, ...otherModels];
+    } else {
+      // Hardcoded fallback list if model listing API call fails
+      candidateModels = [
+        'models/gemini-2.0-flash',
+        'models/gemini-1.5-flash',
+        'models/gemini-2.5-flash',
+        'gemini-2.0-flash',
+        'gemini-1.5-flash'
+      ];
+    }
 
     let lastError = null;
 
-    for (const model of modelCandidates) {
-      const endpoint = `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${encodeURIComponent(apiKey)}`;
+    for (let modelName of candidateModels) {
+      // Normalize modelName so it has "models/" prefix if needed
+      const formattedModel = modelName.startsWith('models/') ? modelName : `models/${modelName}`;
+      const endpoint = `https://generativelanguage.googleapis.com/v1beta/${formattedModel}:generateContent?key=${encodeURIComponent(apiKey)}`;
 
       try {
         const response = await fetch(endpoint, {
@@ -79,7 +116,6 @@ ${truncatedText}
         } else {
           const errData = await response.json();
           lastError = new Error(errData.error?.message || `HTTP Error ${response.status}`);
-          // If model is not found, continue to next model candidate
         }
       } catch (err) {
         lastError = err;
