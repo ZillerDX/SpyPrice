@@ -6,9 +6,16 @@
 import { StorageService } from '../services/storage.js';
 import { GeminiService } from '../services/gemini.js';
 
-// Initialize periodic alarm for price scanning (Every 12 hours)
+// Initialize periodic alarm for price scanning (Every 12 hours = 720 minutes)
 chrome.runtime.onInstalled.addListener(() => {
   chrome.alarms.create('SPYPRICE_BACKGROUND_CHECK', { periodInMinutes: 720 });
+});
+
+// Ensure alarm exists on background service worker startup
+chrome.alarms.get('SPYPRICE_BACKGROUND_CHECK', (alarm) => {
+  if (!alarm) {
+    chrome.alarms.create('SPYPRICE_BACKGROUND_CHECK', { periodInMinutes: 720 });
+  }
 });
 
 // Listen for periodic background checks
