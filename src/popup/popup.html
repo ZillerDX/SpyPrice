@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>SpyPrice AI</title>
+  <link rel="stylesheet" href="popup.css">
+</head>
+<body>
+  <div class="app-container">
+    <!-- Header -->
+    <header class="app-header">
+      <div class="brand">
+        <span class="logo-icon">🎯</span>
+        <h1 class="brand-name">SpyPrice AI</h1>
+      </div>
+      <div class="lang-selector">
+        <select id="langSelect" aria-label="Select Language">
+          <option value="en">🇬🇧 EN</option>
+          <option value="th">🇹🇭 TH</option>
+        </select>
+      </div>
+    </header>
+
+    <!-- Settings Card (API Key) -->
+    <section class="card settings-card">
+      <h2 id="apiKeyTitle" class="card-title">Gemini API Key Setup</h2>
+      <div class="input-group">
+        <input type="password" id="apiKeyInput" placeholder="Enter Gemini API key (AIzaSy...)" autocomplete="off">
+        <button id="saveKeyBtn" class="btn btn-secondary">Save</button>
+      </div>
+      <p id="keyStatus" class="status-msg"></p>
+    </section>
+
+    <!-- Actions -->
+    <section class="actions-group">
+      <button id="trackTabBtn" class="btn btn-primary btn-block">
+        <span class="btn-icon">📌</span> <span id="trackCurrentTabLabel">Track Current Product</span>
+      </button>
+      <button id="scanAllBtn" class="btn btn-outline btn-block">
+        <span class="btn-icon">🔄</span> <span id="scanAllBtnLabel">Scan Prices Now</span>
+      </button>
+    </section>
+
+    <!-- Product List -->
+    <section class="card list-card">
+      <div class="list-header">
+        <h2 id="trackedListTitle" class="card-title">Monitored Products</h2>
+        <span id="productCount" class="badge">0</span>
+      </div>
+      <div id="productList" class="product-list">
+        <!-- Rendered dynamically -->
+      </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="app-footer">
+      <p>Open Source & Client-First • <a href="https://github.com/ZillerDX/SpyPrice" target="_blank" rel="noopener">GitHub Repo</a></p>
+    </footer>
+  </div>
+
+  <script type="module" src="popup.js"></script>
+</body>
+</html>

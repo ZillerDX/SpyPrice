@@ -1,0 +1,50 @@
+{
+  "appName": {
+    "message": "SpyPrice AI - ระบบติดตามราคาคู่แข่ง",
+    "description": "ชื่อของส่วนขยาย"
+  },
+  "appDescription": {
+    "message": "ระบบติดตามและส่องราคาคู่แข่ง E-commerce แบบ Local-first ขับเคลื่อนด้วย Google Gemini 1.5 Flash",
+    "description": "คำอธิบายส่วนขยาย"
+  },
+  "apiKeyTitle": {
+    "message": "ตั้งค่า Gemini API Key",
+    "description": "หัวข้อช่องกรอก API Key"
+  },
+  "apiKeyPlaceholder": {
+    "message": "กรอกรหัส Gemini API Key ของคุณ (AIzaSy...)",
+    "description": "ข้อความแนะนำในช่องกรอก API Key"
+  },
+  "saveBtn": {
+    "message": "บันทึกการตั้งค่า",
+    "description": "ปุ่มบันทึก"
+  },
+  "trackCurrentTab": {
+    "message": "ติดตามสินค้าในหน้านี้",
+    "description": "ปุ่มติดตามสินค้านี้"
+  },
+  "trackedListTitle": {
+    "message": "รายการสินค้าที่ติดตามอยู่",
+    "description": "หัวข้อรายการสินค้า"
+  },
+  "scanAllBtn": {
+    "message": "สแกนเช็กราคาเดี๋ยวนี้",
+    "description": "ปุ่มสแกนราคาทันที"
+  },
+  "noKeyWarning": {
+    "message": "กรุณาใส่ Gemini API Key ฟรีของคุณก่อนเริ่มต้นใช้งาน",
+    "description": "เตือนเมื่อไม่มี API Key"
+  },
+  "emptyList": {
+    "message": "ยังไม่มีรายการสินค้าที่ติดตาม เปิดหน้าสินค้าคู่แข่งแล้วกด 'ติดตามสินค้าในหน้านี้'",
+    "description": "แสดงเมื่อไม่มีสินค้า"
+  },
+  "lastChecked": {
+    "message": "ตรวจสอบล่าสุด:",
+    "description": "ข้อความนำหน้าเวลาตรวจเช็กล่าสุด"
+  },
+  "priceDrop": {
+    "message": "ราคาลดลงแล้ว!",
+    "description": "ป้ายแจ้งเตือนราคาลด"
+  }
+}

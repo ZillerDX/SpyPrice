@@ -1,0 +1,19 @@
+# Security & Environment
+.env
+.env.local
+*.pem
+*.key
+
+# Operating System
+.DS_Store
+Thumbs.db
+
+# Node / Dependencies (if adding bundlers later)
+node_modules/
+dist/
+build/
+*.zip
+
+# IDEs
+.vscode/
+.idea/

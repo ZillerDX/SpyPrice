@@ -1,0 +1,50 @@
+{
+  "appName": {
+    "message": "SpyPrice AI - Competitor Price Tracker",
+    "description": "The extension name"
+  },
+  "appDescription": {
+    "message": "Local-first AI e-commerce competitor price tracker powered by Google Gemini 1.5 Flash.",
+    "description": "The extension description"
+  },
+  "apiKeyTitle": {
+    "message": "Gemini API Key Setup",
+    "description": "Label for API key input"
+  },
+  "apiKeyPlaceholder": {
+    "message": "Enter your Gemini API key (AIzaSy...)",
+    "description": "Placeholder for API key input"
+  },
+  "saveBtn": {
+    "message": "Save Settings",
+    "description": "Save button label"
+  },
+  "trackCurrentTab": {
+    "message": "Track Current Product",
+    "description": "Button to track active browser tab"
+  },
+  "trackedListTitle": {
+    "message": "Monitored Products",
+    "description": "Header for tracked items list"
+  },
+  "scanAllBtn": {
+    "message": "Scan Prices Now",
+    "description": "Button to trigger immediate price scan"
+  },
+  "noKeyWarning": {
+    "message": "Please configure your free Gemini API Key first.",
+    "description": "Warning when API key is missing"
+  },
+  "emptyList": {
+    "message": "No products monitored yet. Open a product page and click 'Track Current Product'.",
+    "description": "Empty state text"
+  },
+  "lastChecked": {
+    "message": "Last checked:",
+    "description": "Last checked timestamp prefix"
+  },
+  "priceDrop": {
+    "message": "Price Dropped!",
+    "description": "Price drop badge text"
+  }
+}
