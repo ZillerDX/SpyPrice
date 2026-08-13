@@ -115,13 +115,22 @@ ${truncatedText}
           };
         } else {
           const errData = await response.json();
-          lastError = new Error(errData.error?.message || `HTTP Error ${response.status}`);
+          const cleanMsg = sanitizeError(errData.error?.message || `HTTP Error ${response.status}`);
+          lastError = new Error(cleanMsg);
         }
       } catch (err) {
-        lastError = err;
+        lastError = new Error(sanitizeError(err.message));
       }
     }
 
     throw lastError || new Error('ALL_GEMINI_MODELS_FAILED');
   }
 };
+
+/**
+ * Helper to mask API keys from error messages, preventing leaks in logs or UI
+ */
+function sanitizeError(msg) {
+  if (!msg) return 'API_REQUEST_FAILED';
+  return String(msg).replace(/key=[^&"\s']+/g, 'key=HIDDEN_API_KEY');
+}
