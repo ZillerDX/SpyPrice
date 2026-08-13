@@ -305,31 +305,35 @@ function exportToExcel(products) {
       : 0;
 
     const statusHtml = isPriceDrop 
-      ? `<span style="background-color: #FEE2E2; color: #DC2626; font-weight: bold; padding: 4px 8px; border-radius: 4px;">Price Dropped (-${dropPercent}%)</span>` 
-      : `<span style="color: #64748B;">Normal</span>`;
+      ? `<span style="background-color: #FEE2E2; color: #DC2626; font-weight: bold; padding: 4px 10px; border-radius: 4px;">Price Dropped (-${dropPercent}%)</span>` 
+      : `<span style="color: #64748B; font-weight: 500;">Normal</span>`;
 
     const dateFormatted = formatTimestamp(p.lastChecked || p.updatedAt);
     
-    // Decode URL for clean human readability
-    let displayUrl = p.url || '';
-    try {
-      displayUrl = decodeURIComponent(p.url);
-    } catch (e) {}
+    // Clean link text instead of raw long URL
+    const linkText = currentLang === 'th' ? '🔗 เปิดลิงก์สินค้า' : '🔗 Open Link';
 
     return `
       <tr>
-        <td style="text-align:center; color:#64748B;">${index + 1}</td>
-        <td style="font-weight:600; color:#0F172A;">${escapeHtml(p.title || 'Product')}</td>
+        <td style="text-align:center; color:#64748B; font-weight:bold;">${index + 1}</td>
+        <td style="font-weight:600; color:#0F172A;">
+          <a href="${escapeHtml(p.url)}" target="_blank" style="color:#0F172A; text-decoration:none;">${escapeHtml(p.title || 'Product')}</a>
+        </td>
         <td style="font-weight:bold; color:#059669; text-align:right;">${p.currency || 'THB'} ${Number(p.currentPrice || 0).toLocaleString()}</td>
         <td style="text-align:right; color:#64748B;">${p.currency || 'THB'} ${Number(p.initialPrice || 0).toLocaleString()}</td>
-        <td style="text-align:center;">${escapeHtml(p.currency || 'THB')}</td>
+        <td style="text-align:center; font-weight:500;">${escapeHtml(p.currency || 'THB')}</td>
         <td style="text-align:center;">${statusHtml}</td>
         <td style="text-align:center; color:#475569;">${dateFormatted}</td>
-        <td><a href="${escapeHtml(p.url)}" target="_blank" style="color:#2563EB; text-decoration:underline;">${escapeHtml(displayUrl)}</a></td>
+        <td style="text-align:center;">
+          <a href="${escapeHtml(p.url)}" target="_blank" style="color:#2563EB; font-weight:600; text-decoration:underline;">${linkText}</a>
+        </td>
       </tr>
     `;
   }).join('');
 
+  const now = new Date();
+  const dateFormatted = now.toLocaleString('th-TH');
+  
   const excelTemplate = `
     <html xmlns:o="urn:schemas-microsoft-com:office:office" xmlns:x="urn:schemas-microsoft-com:office:excel" xmlns="http://www.w3.org/TR/REC-html40">
     <head>
@@ -339,7 +343,7 @@ function exportToExcel(products) {
         <x:ExcelWorkbook>
           <x:ExcelWorksheets>
             <x:ExcelWorksheet>
-              <x:Name>SpyPrice Monitored Products</x:Name>
+              <x:Name>SpyPrice Report</x:Name>
               <x:WorksheetOptions>
                 <x:DisplayGridlines/>
               </x:WorksheetOptions>
@@ -349,27 +353,27 @@ function exportToExcel(products) {
       </xml>
       <![endif]-->
       <style>
-        body { font-family: 'Segoe UI', Tahoma, Arial, sans-serif; font-size: 11pt; }
-        table { border-collapse: collapse; width: 100%; margin-top: 10px; }
-        th { background-color: #1E40AF; color: #FFFFFF; font-weight: bold; padding: 10px 14px; border: 1px solid #1E3A8A; text-align: left; }
-        td { padding: 8px 12px; border: 1px solid #CBD5E1; vertical-align: middle; }
+        body { font-family: 'Segoe UI', Tahoma, Arial, sans-serif; font-size: 11pt; color: #0F172A; }
+        table { border-collapse: collapse; width: 100%; margin-top: 12px; }
+        th { background-color: #0F172A; color: #F8FAFC; font-weight: bold; padding: 12px 14px; border: 1px solid #1E293B; text-align: left; white-space: nowrap; }
+        td { padding: 10px 14px; border: 1px solid #CBD5E1; vertical-align: middle; white-space: nowrap; }
         tr:nth-child(even) { background-color: #F8FAFC; }
       </style>
     </head>
     <body>
-      <h2 style="color: #1E293B; font-family: 'Segoe UI', sans-serif; margin-bottom: 4px;">🎯 SpyPrice AI - Competitor Price Tracker Report</h2>
-      <p style="color: #64748B; font-size: 10pt; margin-top: 0;">Exported Date: ${new Date().toLocaleString('th-TH')}</p>
+      <h2 style="color: #0F172A; font-family: 'Segoe UI', sans-serif; margin-bottom: 2px;">🎯 SpyPrice AI - Competitor Price Intelligence Report</h2>
+      <p style="color: #64748B; font-size: 10pt; margin-top: 0;">Exported Date: ${dateFormatted} | Total Monitored: ${products.length} items</p>
       <table>
         <thead>
           <tr>
             <th style="width: 40px; text-align:center;">#</th>
-            <th style="width: 320px;">Product Name (ชื่อสินค้า)</th>
+            <th style="width: 360px;">Product Name (ชื่อสินค้า)</th>
             <th style="width: 140px; text-align:right;">Current Price (ราคาปัจจุบัน)</th>
             <th style="width: 140px; text-align:right;">Initial Price (ราคาตั้งต้น)</th>
             <th style="width: 80px; text-align:center;">Currency</th>
             <th style="width: 160px; text-align:center;">Price Status (สถานะราคา)</th>
             <th style="width: 150px; text-align:center;">Last Updated (อัปเดตล่าสุด)</th>
-            <th style="width: 450px;">Product Link (ลิงก์สินค้า)</th>
+            <th style="width: 140px; text-align:center;">Product Link (ลิงก์สินค้า)</th>
           </tr>
         </thead>
         <tbody>
@@ -383,8 +387,15 @@ function exportToExcel(products) {
   const blob = new Blob([excelTemplate], { type: 'application/vnd.ms-excel;charset=utf-8;' });
   const url = URL.createObjectURL(blob);
 
-  const today = new Date().toISOString().split('T')[0];
-  const filename = `SpyPrice_Tracked_Products_${today}.xls`;
+  // Generate unique filename with timestamp down to seconds to prevent filename collisions (e.g. SpyPrice_Report_2026-08-14_014402.xls)
+  const yyyy = now.getFullYear();
+  const mm = String(now.getMonth() + 1).padStart(2, '0');
+  const dd = String(now.getDate()).padStart(2, '0');
+  const hh = String(now.getHours()).padStart(2, '0');
+  const min = String(now.getMinutes()).padStart(2, '0');
+  const ss = String(now.getSeconds()).padStart(2, '0');
+
+  const filename = `SpyPrice_Report_${yyyy}-${mm}-${dd}_${hh}${min}${ss}.xls`;
 
   const link = document.createElement('a');
   link.href = url;
