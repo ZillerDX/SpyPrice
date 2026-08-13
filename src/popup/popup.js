@@ -314,17 +314,17 @@ function exportToExcel(products) {
     const linkText = currentLang === 'th' ? '🔗 เปิดลิงก์สินค้า' : '🔗 Open Link';
 
     return `
-      <tr>
-        <td style="text-align:center; color:#64748B; font-weight:bold;">${index + 1}</td>
-        <td style="font-weight:600; color:#0F172A;">
+      <tr style="height: 32px;">
+        <td style="width: 45pt; min-width: 60px; text-align:center; color:#64748B; font-weight:bold;">${index + 1}</td>
+        <td style="width: 350pt; min-width: 460px; font-weight:600; color:#0F172A; mso-number-format:'\\@';">
           <a href="${escapeHtml(p.url)}" target="_blank" style="color:#0F172A; text-decoration:none;">${escapeHtml(p.title || 'Product')}</a>
         </td>
-        <td style="font-weight:bold; color:#059669; text-align:right;">${p.currency || 'THB'} ${Number(p.currentPrice || 0).toLocaleString()}</td>
-        <td style="text-align:right; color:#64748B;">${p.currency || 'THB'} ${Number(p.initialPrice || 0).toLocaleString()}</td>
-        <td style="text-align:center; font-weight:500;">${escapeHtml(p.currency || 'THB')}</td>
-        <td style="text-align:center;">${statusHtml}</td>
-        <td style="text-align:center; color:#475569;">${dateFormatted}</td>
-        <td style="text-align:center;">
+        <td style="width: 140pt; min-width: 180px; font-weight:bold; color:#059669; text-align:right;">${p.currency || 'THB'} ${Number(p.currentPrice || 0).toLocaleString()}</td>
+        <td style="width: 140pt; min-width: 180px; text-align:right; color:#64748B;">${p.currency || 'THB'} ${Number(p.initialPrice || 0).toLocaleString()}</td>
+        <td style="width: 75pt; min-width: 100px; text-align:center; font-weight:500;">${escapeHtml(p.currency || 'THB')}</td>
+        <td style="width: 150pt; min-width: 200px; text-align:center;">${statusHtml}</td>
+        <td style="width: 140pt; min-width: 180px; text-align:center; color:#475569; mso-number-format:'\\@';">${dateFormatted}</td>
+        <td style="width: 120pt; min-width: 160px; text-align:center;">
           <a href="${escapeHtml(p.url)}" target="_blank" style="color:#2563EB; font-weight:600; text-decoration:underline;">${linkText}</a>
         </td>
       </tr>
@@ -346,6 +346,7 @@ function exportToExcel(products) {
               <x:Name>SpyPrice Report</x:Name>
               <x:WorksheetOptions>
                 <x:DisplayGridlines/>
+                <x:FitToPage/>
               </x:WorksheetOptions>
             </x:ExcelWorksheet>
           </x:ExcelWorksheets>
@@ -354,26 +355,36 @@ function exportToExcel(products) {
       <![endif]-->
       <style>
         body { font-family: 'Segoe UI', Tahoma, Arial, sans-serif; font-size: 11pt; color: #0F172A; }
-        table { border-collapse: collapse; width: 100%; margin-top: 12px; }
-        th { background-color: #0F172A; color: #F8FAFC; font-weight: bold; padding: 12px 14px; border: 1px solid #1E293B; text-align: left; white-space: nowrap; }
-        td { padding: 10px 14px; border: 1px solid #CBD5E1; vertical-align: middle; white-space: nowrap; }
+        table { border-collapse: collapse; width: 100%; margin-top: 14px; table-layout: fixed; }
+        th { background-color: #0F172A; color: #F8FAFC; font-weight: bold; padding: 12px 14px; border: 1px solid #1E293B; text-align: left; white-space: nowrap; height: 36px; }
+        td { padding: 10px 14px; border: 1px solid #CBD5E1; vertical-align: middle; white-space: nowrap; height: 32px; }
         tr:nth-child(even) { background-color: #F8FAFC; }
       </style>
     </head>
     <body>
       <h2 style="color: #0F172A; font-family: 'Segoe UI', sans-serif; margin-bottom: 2px;">🎯 SpyPrice AI - Competitor Price Intelligence Report</h2>
-      <p style="color: #64748B; font-size: 10pt; margin-top: 0;">Exported Date: ${dateFormatted} | Total Monitored: ${products.length} items</p>
-      <table>
+      <p style="color: #64748B; font-size: 10pt; margin-top: 0; margin-bottom: 12px;">Exported Date: ${dateFormatted} | Total Monitored: ${products.length} items</p>
+      <table border="1">
+        <colgroup>
+          <col width="60" style="width: 45pt; min-width: 60px;">
+          <col width="460" style="width: 350pt; min-width: 460px;">
+          <col width="180" style="width: 140pt; min-width: 180px;">
+          <col width="180" style="width: 140pt; min-width: 180px;">
+          <col width="100" style="width: 75pt; min-width: 100px;">
+          <col width="200" style="width: 150pt; min-width: 200px;">
+          <col width="180" style="width: 140pt; min-width: 180px;">
+          <col width="160" style="width: 120pt; min-width: 160px;">
+        </colgroup>
         <thead>
-          <tr>
-            <th style="width: 40px; text-align:center;">#</th>
-            <th style="width: 360px;">Product Name (ชื่อสินค้า)</th>
-            <th style="width: 140px; text-align:right;">Current Price (ราคาปัจจุบัน)</th>
-            <th style="width: 140px; text-align:right;">Initial Price (ราคาตั้งต้น)</th>
-            <th style="width: 80px; text-align:center;">Currency</th>
-            <th style="width: 160px; text-align:center;">Price Status (สถานะราคา)</th>
-            <th style="width: 150px; text-align:center;">Last Updated (อัปเดตล่าสุด)</th>
-            <th style="width: 140px; text-align:center;">Product Link (ลิงก์สินค้า)</th>
+          <tr style="height: 36px;">
+            <th width="60" style="width: 45pt; min-width: 60px; text-align:center;">#</th>
+            <th width="460" style="width: 350pt; min-width: 460px; text-align:left;">Product Name (ชื่อสินค้า)</th>
+            <th width="180" style="width: 140pt; min-width: 180px; text-align:right;">Current Price (ราคาปัจจุบัน)</th>
+            <th width="180" style="width: 140pt; min-width: 180px; text-align:right;">Initial Price (ราคาตั้งต้น)</th>
+            <th width="100" style="width: 75pt; min-width: 100px; text-align:center;">Currency</th>
+            <th width="200" style="width: 150pt; min-width: 200px; text-align:center;">Price Status (สถานะราคา)</th>
+            <th width="180" style="width: 140pt; min-width: 180px; text-align:center;">Last Updated (อัปเดตล่าสุด)</th>
+            <th width="160" style="width: 120pt; min-width: 160px; text-align:center;">Product Link (ลิงก์สินค้า)</th>
           </tr>
         </thead>
         <tbody>
