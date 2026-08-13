@@ -15,8 +15,6 @@ export const GeminiService = {
       throw new Error('MISSING_API_KEY');
     }
 
-    const endpoint = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${encodeURIComponent(apiKey)}`;
-
     // Truncate text to avoid token limits (keep first 10,000 characters which usually contain title & price)
     const truncatedText = pageText.substring(0, 10000);
 
@@ -35,44 +33,59 @@ Web Page Content:
 ${truncatedText}
 `;
 
-    try {
-      const response = await fetch(endpoint, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          contents: [{
-            parts: [{ text: prompt }]
-          }],
-          generationConfig: {
-            temperature: 0.1, // Low temperature for deterministic JSON extraction
-            responseMimeType: "application/json"
+    // Candidate models to ensure compatibility across Google API updates
+    const modelCandidates = [
+      'gemini-2.5-flash',
+      'gemini-2.0-flash',
+      'gemini-1.5-flash-latest',
+      'gemini-1.5-flash'
+    ];
+
+    let lastError = null;
+
+    for (const model of modelCandidates) {
+      const endpoint = `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${encodeURIComponent(apiKey)}`;
+
+      try {
+        const response = await fetch(endpoint, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            contents: [{
+              parts: [{ text: prompt }]
+            }],
+            generationConfig: {
+              temperature: 0.1, // Low temperature for deterministic JSON extraction
+              responseMimeType: "application/json"
+            }
+          })
+        });
+
+        if (response.ok) {
+          const data = await response.json();
+          const rawText = data.candidates?.[0]?.content?.parts?.[0]?.text;
+          
+          if (!rawText) {
+            throw new Error('EMPTY_AI_RESPONSE');
           }
-        })
-      });
 
-      if (!response.ok) {
-        const errData = await response.json();
-        throw new Error(errData.error?.message || `HTTP Error ${response.status}`);
+          // Parse JSON safely
+          const parsed = JSON.parse(rawText.trim());
+          return {
+            title: parsed.title || 'Unknown Product',
+            price: parseFloat(parsed.price) || 0,
+            currency: parsed.currency || 'THB'
+          };
+        } else {
+          const errData = await response.json();
+          lastError = new Error(errData.error?.message || `HTTP Error ${response.status}`);
+          // If model is not found, continue to next model candidate
+        }
+      } catch (err) {
+        lastError = err;
       }
-
-      const data = await response.json();
-      const rawText = data.candidates?.[0]?.content?.parts?.[0]?.text;
-      
-      if (!rawText) {
-        throw new Error('EMPTY_AI_RESPONSE');
-      }
-
-      // Parse JSON safely
-      const parsed = JSON.parse(rawText.trim());
-      return {
-        title: parsed.title || 'Unknown Product',
-        price: parseFloat(parsed.price) || 0,
-        currency: parsed.currency || 'THB'
-      };
-
-    } catch (err) {
-      console.error('Gemini Service Error:', err);
-      throw err;
     }
+
+    throw lastError || new Error('ALL_GEMINI_MODELS_FAILED');
   }
 };
