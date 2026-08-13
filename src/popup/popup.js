@@ -4,34 +4,44 @@ import { GeminiService } from '../services/gemini.js';
 // Dictionary for UI translations
 const i18n = {
   en: {
-    apiKeyTitle: "Gemini API Key Setup",
+    apiKeyTitle: "🔑 Gemini API Key",
     apiKeyPlaceholder: "Enter Gemini API key (AIzaSy...)",
     saveBtn: "Save",
     trackCurrentTabLabel: "Track Current Product",
-    scanAllBtnLabel: "Scan Prices Now",
+    scanAllBtnLabel: "Scan Prices",
+    exportCsvLabel: "Export to Sheet",
     trackedListTitle: "Monitored Products",
+    statTotalLabel: "Total Monitored",
+    statDropsLabel: "Price Drops",
     noKeyWarning: "Please enter your free Gemini API Key first.",
     emptyList: "No products monitored yet. Open a product page and click 'Track Current Product'.",
     keySaved: "API Key saved successfully!",
     scanning: "Scanning page...",
     scanComplete: "Scan complete!",
     scanError: "Error scanning page: ",
-    priceDrop: "Price Drop!"
+    priceDrop: "Price Drop!",
+    exportSuccess: "CSV Exported successfully!",
+    noProductsExport: "No products available to export."
   },
   th: {
-    apiKeyTitle: "ตั้งค่า Gemini API Key",
+    apiKeyTitle: "🔑 ตั้งค่า Gemini API Key",
     apiKeyPlaceholder: "กรอกรหัส Gemini API Key (AIzaSy...)",
     saveBtn: "บันทึก",
     trackCurrentTabLabel: "ติดตามสินค้าในหน้านี้",
-    scanAllBtnLabel: "สแกนเช็กราคาเดี๋ยวนี้",
+    scanAllBtnLabel: "สแกนเช็กราคา",
+    exportCsvLabel: "ส่งออก CSV / Sheet",
     trackedListTitle: "รายการสินค้าที่ติดตามอยู่",
+    statTotalLabel: "สินค้าที่ติดตาม",
+    statDropsLabel: "ราคาสินค้าลดลง",
     noKeyWarning: "กรุณาใส่ Gemini API Key ฟรีของคุณก่อนเริ่มต้น",
     emptyList: "ยังไม่มีสินค้าที่ติดตาม เปิดหน้าสินค้าคู่แข่งแล้วกด 'ติดตามสินค้าในหน้านี้'",
     keySaved: "บันทึก API Key เรียบร้อยแล้ว!",
     scanning: "กำลังสแกนหน้าเว็บ...",
     scanComplete: "สแกนเรียบร้อยแล้ว!",
     scanError: "เกิดข้อผิดพลาดในการสแกน: ",
-    priceDrop: "ราคาลดลง!"
+    priceDrop: "ราคาลดลง!",
+    exportSuccess: "ส่งออกไฟล์ CSV เรียบร้อยแล้ว!",
+    noProductsExport: "ไม่มีรายการสินค้าสำหรับส่งออก"
   }
 };
 
@@ -46,7 +56,7 @@ document.addEventListener('DOMContentLoaded', async () => {
   const saveKeyBtn = document.getElementById('saveKeyBtn');
   const trackTabBtn = document.getElementById('trackTabBtn');
   const scanAllBtn = document.getElementById('scanAllBtn');
-  const keyStatus = document.getElementById('keyStatus');
+  const exportCsvBtn = document.getElementById('exportCsvBtn');
 
   langSelect.value = currentLang;
   if (settings.apiKey) {
@@ -159,6 +169,18 @@ document.addEventListener('DOMContentLoaded', async () => {
     await renderProductList();
     showStatus(i18n[currentLang].scanComplete, false);
   });
+
+  // Export to Sheet / CSV Listener
+  exportCsvBtn.addEventListener('click', async () => {
+    const products = await StorageService.getProducts();
+    if (products.length === 0) {
+      showStatus(i18n[currentLang].noProductsExport, true);
+      return;
+    }
+
+    exportToCsv(products);
+    showStatus(i18n[currentLang].exportSuccess, false);
+  });
 });
 
 function updateUILanguage(lang) {
@@ -168,7 +190,10 @@ function updateUILanguage(lang) {
   document.getElementById('saveKeyBtn').textContent = dict.saveBtn;
   document.getElementById('trackCurrentTabLabel').textContent = dict.trackCurrentTabLabel;
   document.getElementById('scanAllBtnLabel').textContent = dict.scanAllBtnLabel;
+  document.getElementById('exportCsvLabel').textContent = dict.exportCsvLabel;
   document.getElementById('trackedListTitle').textContent = dict.trackedListTitle;
+  document.getElementById('statTotalLabel').textContent = dict.statTotalLabel;
+  document.getElementById('statDropsLabel').textContent = dict.statDropsLabel;
 }
 
 function showStatus(msg, isError) {
@@ -184,7 +209,17 @@ async function renderProductList() {
   const products = await StorageService.getProducts();
   const listEl = document.getElementById('productList');
   const countEl = document.getElementById('productCount');
+  const statTotalEl = document.getElementById('statTotal');
+  const statDropsEl = document.getElementById('statDrops');
 
+  // Stats calculation
+  let priceDropCount = 0;
+  products.forEach(p => {
+    if (p.currentPrice < p.initialPrice) priceDropCount++;
+  });
+
+  statTotalEl.textContent = products.length;
+  statDropsEl.textContent = priceDropCount;
   countEl.textContent = products.length;
   listEl.innerHTML = '';
 
@@ -198,19 +233,27 @@ async function renderProductList() {
     itemEl.className = 'product-item';
 
     const isPriceDrop = prod.currentPrice < prod.initialPrice;
+    const priceDiff = prod.initialPrice - prod.currentPrice;
+    const dropPercentage = (prod.initialPrice > 0 && isPriceDrop) 
+      ? Math.round((priceDiff / prod.initialPrice) * 100) 
+      : 0;
+
+    const formattedDate = formatTimestamp(prod.lastChecked || prod.updatedAt);
 
     itemEl.innerHTML = `
       <div class="product-item-header">
         <a href="${escapeHtml(prod.url)}" target="_blank" class="product-title" title="${escapeHtml(prod.title)}">
           ${escapeHtml(prod.title)}
         </a>
-        <button class="delete-btn" data-id="${prod.id}">✕</button>
+        <button class="delete-btn" data-id="${prod.id}" title="Remove item">✕</button>
       </div>
       <div class="product-details">
         <div class="price-box">
-          <span class="price-current">${prod.currency} ${prod.currentPrice.toLocaleString()}</span>
-          ${isPriceDrop ? `<span class="price-drop-tag">${i18n[currentLang].priceDrop}</span>` : ''}
+          <span class="price-current">${prod.currency || 'THB'} ${prod.currentPrice.toLocaleString()}</span>
+          ${isPriceDrop ? `<span class="price-initial">${prod.currency || 'THB'} ${prod.initialPrice.toLocaleString()}</span>` : ''}
+          ${isPriceDrop ? `<span class="price-drop-tag">-${dropPercentage}%</span>` : ''}
         </div>
+        <span class="timestamp-text">🕒 ${formattedDate}</span>
       </div>
     `;
 
@@ -222,6 +265,71 @@ async function renderProductList() {
 
     listEl.appendChild(itemEl);
   });
+}
+
+/**
+ * Formats ISO date string into readable local timestamp string
+ */
+function formatTimestamp(isoString) {
+  if (!isoString) return 'Just now';
+  try {
+    const d = new Date(isoString);
+    const day = String(d.getDate()).padStart(2, '0');
+    const month = String(d.getMonth() + 1).padStart(2, '0');
+    const year = d.getFullYear();
+    const hours = String(d.getHours()).padStart(2, '0');
+    const mins = String(d.getMinutes()).padStart(2, '0');
+    return `${day}/${month}/${year} ${hours}:${mins}`;
+  } catch (e) {
+    return 'Recently';
+  }
+}
+
+/**
+ * Export product tracking data to CSV (Excel / Sheet compatible UTF-8 BOM)
+ */
+function exportToCsv(products) {
+  const headers = [
+    'Product Title (ชื่อสินค้า)',
+    'Current Price (ราคาปัจจุบัน)',
+    'Initial Price (ราคาตั้งต้น)',
+    'Currency (สกุลเงิน)',
+    'Price Status (สถานะราคา)',
+    'Last Updated (อัปเดตล่าสุด)',
+    'Product URL (ลิงก์สินค้า)'
+  ];
+
+  const rows = products.map(p => {
+    const isPriceDrop = p.currentPrice < p.initialPrice;
+    const status = isPriceDrop ? 'Price Dropped (ราคาลดลง)' : 'Normal (ราคาปกติ)';
+    const dateFormatted = formatTimestamp(p.lastChecked || p.updatedAt);
+
+    return [
+      `"${String(p.title || '').replace(/"/g, '""')}"`,
+      p.currentPrice || 0,
+      p.initialPrice || 0,
+      `"${p.currency || 'THB'}"`,
+      `"${status}"`,
+      `"${dateFormatted}"`,
+      `"${p.url || ''}"`
+    ].join(',');
+  });
+
+  // Include UTF-8 BOM (\uFEFF) for automatic Thai character support in Excel
+  const csvContent = '\uFEFF' + [headers.join(','), ...rows].join('\n');
+  const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+  const url = URL.createObjectURL(blob);
+
+  const today = new Date().toISOString().split('T')[0];
+  const filename = `SpyPrice_Tracked_Products_${today}.csv`;
+
+  const link = document.createElement('a');
+  link.href = url;
+  link.setAttribute('download', filename);
+  document.body.appendChild(link);
+  link.click();
+  document.body.removeChild(link);
+  URL.revokeObjectURL(url);
 }
 
 function escapeHtml(str) {
